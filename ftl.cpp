@@ -16,12 +16,20 @@ Ftl::Ftl() : updatingBlock(nullptr), l2p(), blocks(), free_blocks(){
 
 bool Ftl::processRead(int lpn) {
     int ppn;
+    int blockId;
+    int pageId;
 
     if (l2p[lpn] == INVALID){
         return false;
     }
     else {
         ppn = l2p[lpn];
+        blockId = Nand::getBlockId(ppn);
+        pageId = Nand::getPageId(ppn);
+        blocks[blockId].read(pageId);
+
+        rdHandler(blocks[blockId]);
+
         return true;
     }
 }
@@ -102,7 +110,7 @@ Block* Ftl::pickBlock() {
         if (blocks[i].status != USED) {
             continue;
         }
-        //TODO: Wear Leveling(based on ers cnt)
+        /* Wear Leveling(based on ers cnt) */
         if(minerasecnt >= blocks[i].erasecnt) {
             minerasecnt = blocks[i].erasecnt;
             victim = &(blocks[i]);
@@ -119,7 +127,17 @@ void Ftl::migratePage(int ppn, Block& block, int pageId) {
     block.write(pageId);
 }
 
+//TODO: Better age algorithm
 bool Ftl::wlHandler() {
     return true;
 
+}
+
+/* Multiple read results in read error(addressed by erase) */
+bool Ftl::rdHandler(Block& target){
+    if(target.readcnt > MAXREADCNT) {
+        gcHandler();
+        std::cout<<"process rd"<<std::endl;
+    }
+    return true;
 }

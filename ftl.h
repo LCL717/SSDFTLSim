@@ -10,6 +10,7 @@
 #define INVALID         -1
 #define GC_THRESHOLD    1
 #define MAXERSCNT       10000
+#define MAXREADCNT      4
 
 class Ftl{
 public:
@@ -27,6 +28,9 @@ public:
     /*WL*/
     bool wlHandler();
     // TODO: GC, WL, RD, and some other ways to read and write
+
+    /*RD*/
+    bool rdHandler(Block& target);
     
 
     std::unordered_map<int, int> l2p;

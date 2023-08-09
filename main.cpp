@@ -13,7 +13,7 @@ int main(){
     }
     for(int i = 1; i < PAGES_PER_BLOCK * 3; i++)
     {
-        ftl.processWrite(i);
+        ftl.processRead(i);
     }
     bool writeResult = ftl.processWrite(PAGES_PER_BLOCK * 3);
     bool readResult = ftl.processRead(PAGES_PER_BLOCK);

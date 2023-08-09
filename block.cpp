@@ -9,6 +9,7 @@ Block::Block(int id) {
         lpns[i] = INVALID;
     }
     erasecnt = 0;
+    readcnt = 0;
 }
 
 void Block::erase() {
@@ -19,6 +20,7 @@ void Block::erase() {
         lpns[i] = INVALID;
     }
     erasecnt++;
+    readcnt = 0;
 }
 
 void Block::write(int offset) {
@@ -35,4 +37,5 @@ void Block::write(int offset) {
 
 void Block::read(int offset) {
     this->offset = offset;
+    readcnt++;
 }
