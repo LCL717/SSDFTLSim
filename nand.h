@@ -1,8 +1,8 @@
 #pragma once
 
 #define SECTORS_PER_PAGE  8
-#define PAGES_PER_BLOCK   3
-#define BLOCKS_PER_DEVICE 3
+#define PAGES_PER_BLOCK   4
+#define BLOCKS_PER_DEVICE 4
 
 class Nand {
 public:

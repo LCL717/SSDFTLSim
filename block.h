@@ -18,6 +18,7 @@ public:
     int id;
     int validpages;
     int lpns[PAGES_PER_BLOCK];
+    int erasecnt;
 
     Block(int id);
     void erase();

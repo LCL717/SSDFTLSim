@@ -8,6 +8,7 @@ Block::Block(int id) {
     for(int i = 0; i < PAGES_PER_BLOCK; i++) {
         lpns[i] = INVALID;
     }
+    erasecnt = 0;
 }
 
 void Block::erase() {
@@ -17,6 +18,7 @@ void Block::erase() {
     for(int i = 0; i < PAGES_PER_BLOCK; i++) {
         lpns[i] = INVALID;
     }
+    erasecnt++;
 }
 
 void Block::write(int offset) {

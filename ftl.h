@@ -9,6 +9,7 @@
 
 #define INVALID         -1
 #define GC_THRESHOLD    1
+#define MAXERSCNT       10000
 
 class Ftl{
 public:
@@ -19,9 +20,14 @@ public:
     void migratePage(int ppn, Block& block, int pageId);
     bool getUpdateBlock();
 
-    // TODO: GC, WL, RDH, and some other ways to read and write
+    /*GC*/
     bool gcHandler();
     Block* pickBlock();
+
+    /*WL*/
+    bool wlHandler();
+    // TODO: GC, WL, RD, and some other ways to read and write
+    
 
     std::unordered_map<int, int> l2p;
     std::vector<Block> blocks;

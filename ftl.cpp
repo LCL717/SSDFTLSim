@@ -26,7 +26,7 @@ bool Ftl::processRead(int lpn) {
     }
 }
 
-bool Ftl::getUpdateBlock(){
+bool Ftl::getUpdateBlock() {
     if(updatingBlock != nullptr) {
         updatingBlock->offset += 1;
         if(updatingBlock->validpages <= 0) {
@@ -93,16 +93,20 @@ bool Ftl::gcHandler(){
     victim->erase();
     free_blocks.push_back(victim->id);
     return true;
-
 }
 
 Block* Ftl::pickBlock() {
     Block *victim = nullptr;
-    for(auto &block : blocks) {
-        if (block.status != USED) {
+    int minerasecnt = MAXERSCNT;
+    for(int i = 0; i < blocks.size(); i++) {
+        if (blocks[i].status != USED) {
             continue;
-        } 
-        victim = &block;
+        }
+        //TODO: Wear Leveling(based on ers cnt)
+        if(minerasecnt >= blocks[i].erasecnt) {
+            minerasecnt = blocks[i].erasecnt;
+            victim = &(blocks[i]);
+        }
     }
     if(victim != nullptr) {
         victim->status = GC;
@@ -113,4 +117,9 @@ Block* Ftl::pickBlock() {
 void Ftl::migratePage(int ppn, Block& block, int pageId) {
     /*Read PPN*/
     block.write(pageId);
+}
+
+bool Ftl::wlHandler() {
+    return true;
+
 }
