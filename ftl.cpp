@@ -10,7 +10,7 @@ Ftl::Ftl() : updatingBlock(nullptr), l2p(), blocks(), free_blocks(){
     for(int i = 0; i < BLOCKS_PER_DEVICE; i++) {
         Block b(i);
         blocks.push_back(b);
-        free_blocks.push_back(&blocks.back());
+        free_blocks.push_back(i);
     }
 }
 
@@ -29,7 +29,7 @@ bool Ftl::processRead(int lpn) {
 bool Ftl::getUpdateBlock(){
     if(updatingBlock != nullptr) {
         updatingBlock->offset += 1;
-        if(updatingBlock->validpages == 0) {
+        if(updatingBlock->validpages <= 0) {
             updatingBlock->status = USED;
             updatingBlock = nullptr;
         }
@@ -37,8 +37,9 @@ bool Ftl::getUpdateBlock(){
 
     if(updatingBlock == nullptr){
         /* get free block to allocate a new position */
+        
         if (!free_blocks.empty()) {
-            updatingBlock = free_blocks.back();
+            updatingBlock = &(blocks[free_blocks.back()]);
             free_blocks.pop_back();
             updatingBlock->status = INUSE;
         }
@@ -51,13 +52,14 @@ bool Ftl::getUpdateBlock(){
 }
 
 bool Ftl::processWrite(int lpn) {
-
-     /* get free block to allocate a new position */
     getUpdateBlock();
 
     updatingBlock->write(updatingBlock->offset);
     
     updateMap(lpn, updatingBlock->id, updatingBlock->offset);
+    if(free_blocks.size() <= GC_THRESHOLD) {
+        gcHandler();
+    }
     
     return true;
 }
@@ -88,9 +90,8 @@ bool Ftl::gcHandler(){
         migratePage(l2p[lpn], *updatingBlock, updatingBlock->offset);
         updateMap(lpn, updatingBlock->id, updatingBlock->offset);
     }
-
     victim->erase();
-    free_blocks.push_back(victim);
+    free_blocks.push_back(victim->id);
     return true;
 
 }
@@ -98,16 +99,10 @@ bool Ftl::gcHandler(){
 Block* Ftl::pickBlock() {
     Block *victim = nullptr;
     for(auto &block : blocks) {
-        
-        if (block.status == FREE) {
+        if (block.status != USED) {
             continue;
-        }
-        if (block.status == USED) {
-            victim = &block;
-        }
-        else {
-            //TODO: handle situation while block is inuse or gc
-        }
+        } 
+        victim = &block;
     }
     if(victim != nullptr) {
         victim->status = GC;

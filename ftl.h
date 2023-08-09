@@ -8,6 +8,7 @@
 #include <vector>
 
 #define INVALID         -1
+#define GC_THRESHOLD    1
 
 class Ftl{
 public:
@@ -24,6 +25,6 @@ public:
 
     std::unordered_map<int, int> l2p;
     std::vector<Block> blocks;
-    std::vector<Block*> free_blocks;
+    std::vector<int> free_blocks;
     Block *updatingBlock;
 };

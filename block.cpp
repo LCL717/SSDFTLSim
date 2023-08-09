@@ -26,7 +26,7 @@ void Block::write(int offset) {
     if(this->status == FREE){
         this->status = INUSE;
     }
-    if(this->offset == PAGES_PER_BLOCK) {
+    if(this->validpages == 0) {
         this->status = USED;
     }
 }
