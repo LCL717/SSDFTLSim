@@ -19,6 +19,8 @@ private:
     int request_page_read;
     int request_page_write;
 
+    int request_block_erase;
+
     int pages_read;
     int pages_write;
     int pages_migrated;

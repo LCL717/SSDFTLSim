@@ -2,11 +2,13 @@
 
 #include <vector>
 #include "nand.h"
+#include "measurement.h"
 
 #define FREE  0
 #define INUSE 1
 #define USED  2
 #define GC    3
+#define BAD   4
 
 #define INVALID         -1
 #define VALID           1

@@ -29,6 +29,7 @@ bool Ftl::processRead(int lpn) {
         blocks[blockId].read(pageId);
 
         rdHandler(blocks[blockId]);
+        bbHandler(blocks[blockId]);
 
         return true;
     }
@@ -68,6 +69,7 @@ bool Ftl::processWrite(int lpn) {
     if(free_blocks.size() <= GC_THRESHOLD) {
         gcHandler();
     }
+    bbHandler(*updatingBlock);
     
     return true;
 }
@@ -123,7 +125,7 @@ Block* Ftl::pickBlock() {
 }
 
 void Ftl::migratePage(int ppn, Block& block, int pageId) {
-    /*Read PPN*/
+    block.read(pageId);
     block.write(pageId);
 }
 
@@ -138,6 +140,31 @@ bool Ftl::rdHandler(Block& target){
     if(target.readcnt > MAXREADCNT) {
         gcHandler();
         std::cout<<"process rd"<<std::endl;
+    }
+    return true;
+}
+
+bool Ftl::bbHandler(Block &b){
+    if(b.erasecnt > MAXERSCNT) b.status = BAD;
+    return true;
+}
+
+bool Ftl::processFtl(int request, int lba, int sectorCnt){
+    int page_start = lba / SECTORS_PER_PAGE;
+    int page_end = (lba + sectorCnt + SECTORS_PER_PAGE - 1) / SECTORS_PER_PAGE;
+    for(int i = page_start; i < page_end; i++) {
+        switch (request)
+        {
+        case R:
+            std::cout<< "read"<< std::endl;
+            processRead(i);
+            break;
+        case W:
+            processWrite(i);
+            break;
+        default:
+            break;
+        }
     }
     return true;
 }

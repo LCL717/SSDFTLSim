@@ -1,5 +1,7 @@
 #include "block.h"
 
+Measurement& measurementInstance = Measurement::getInstance();
+
 Block::Block(int id) {
     this->id = id;
     offset = 0;
@@ -21,6 +23,7 @@ void Block::erase() {
     }
     erasecnt++;
     readcnt = 0;
+    measurementInstance.update(ERASE);
 }
 
 void Block::write(int offset) {
@@ -33,9 +36,11 @@ void Block::write(int offset) {
     if(this->validpages == 0) {
         this->status = USED;
     }
+    measurementInstance.update(WRITE);
 }
 
 void Block::read(int offset) {
     this->offset = offset;
     readcnt++;
+    measurementInstance.update(READ);
 }

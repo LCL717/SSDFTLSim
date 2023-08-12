@@ -7,6 +7,7 @@ Measurement::Measurement(){
     request_write = 0;
     request_page_read = 0;
     request_page_write = 0;
+    request_block_erase = 0;
 
     pages_read = 0;
     pages_write = 0;
@@ -26,6 +27,7 @@ bool Measurement::print_stats(){
     std::cout << "Write Requests: " << request_write << "\n";
     std::cout << "Page Read Requests: " << request_page_read << "\n";
     std::cout << "Page Write Requests: " << request_page_write << "\n";
+    std::cout << "Block Erase Requsts: " << request_block_erase << "\n";
     std::cout << "Pages Read: " << pages_read << "\n";
     std::cout << "Pages Write: " << pages_write << "\n";
     std::cout << "Pages Migrated: " << pages_migrated << "\n";
@@ -66,6 +68,7 @@ bool Measurement::update(int request){
         break;
     case ERASE:
         instance.elapsed += ERASEBLOCKUS;
+        request_block_erase += 1;
         break;
     default:
         break;

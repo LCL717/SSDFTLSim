@@ -12,6 +12,9 @@
 #define MAXERSCNT       10000
 #define MAXREADCNT      4
 
+#define R   0
+#define W   1
+
 class Ftl{
 public:
     Ftl();
@@ -21,16 +24,20 @@ public:
     void migratePage(int ppn, Block& block, int pageId);
     bool getUpdateBlock();
 
+    bool processFtl(int request, int lba, int sectorCnt);
+
     /*GC*/
     bool gcHandler();
     Block* pickBlock();
 
     /*WL*/
     bool wlHandler();
-    // TODO: GC, WL, RD, and some other ways to read and write
-
+    
     /*RD*/
     bool rdHandler(Block& target);
+
+    /*BB*/
+    bool bbHandler(Block &b);
     
 
     std::unordered_map<int, int> l2p;

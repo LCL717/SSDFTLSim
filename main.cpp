@@ -1,7 +1,8 @@
 #include "ftl.h"
-#include "measurement.h"
 
 #include <iostream>
+
+Measurement& mainInstance = Measurement::getInstance();
 
 int main(){
 
@@ -9,18 +10,13 @@ int main(){
     Ftl ftl;
     for(int i = 1; i < PAGES_PER_BLOCK * 3; i++)
     {
-        ftl.processWrite(i);
+        ftl.processFtl(W, i * SECTORS_PER_PAGE, 2);
     }
     for(int i = 1; i < PAGES_PER_BLOCK * 3; i++)
     {
-        ftl.processRead(i);
+        ftl.processFtl(R, i * SECTORS_PER_PAGE, 2);
     }
-    bool writeResult = ftl.processWrite(PAGES_PER_BLOCK * 3);
-    bool readResult = ftl.processRead(PAGES_PER_BLOCK);
     
-
-    std::cout << "Result of processWrite: " << writeResult << std::endl;
-    std::cout << "Result of processRead: " << readResult << std::endl;
-
+    mainInstance.print_stats();
     return 0;
 }
