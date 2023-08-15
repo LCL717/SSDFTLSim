@@ -8,7 +8,7 @@
 #include <vector>
 
 #define INVALID         -1
-#define GC_THRESHOLD    1
+#define GC_THRESHOLD    3
 #define MAXERSCNT       10000
 #define MAXREADCNT      4
 

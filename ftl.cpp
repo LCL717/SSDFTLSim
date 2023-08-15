@@ -69,9 +69,6 @@ bool Ftl::processWrite(int lpn) {
     updatingBlock->write(updatingBlock->offset);
     
     updateMap(lpn, updatingBlock->id, updatingBlock->offset);
-    if(free_blocks.size() <= GC_THRESHOLD) {
-        gcHandler();
-    }
     bbHandler(*updatingBlock);
     ftlMeasurement.update(RW);
     return true;
@@ -82,13 +79,12 @@ bool Ftl::updateMap(int lpn, int blockId, int pageId) {
 
     old_ppn = l2p[lpn];
     if(old_ppn != INVALID) {
-        //TODO: handle valid page while writing
-        //TODO: Trim is needed to clear useless pages, and avoid write into valid pages.
-        old_ppn = INVALID;
+         //TODO: handle valid page while writing
     }
-    
-    l2p[lpn] = Nand::getPpn(blockId, pageId);
-    updatingBlock->lpns[pageId] = lpn;
+    else {
+        l2p[lpn] = Nand::getPpn(blockId, pageId);
+        updatingBlock->lpns[pageId] = lpn;
+    }
     
     return true;
 }
@@ -166,6 +162,9 @@ bool Ftl::processFtl(int request, int lpn){
         break;
     default:
         break;
+    }
+    if(free_blocks.size() <= GC_THRESHOLD) {
+        gcHandler();
     }
     return true;
 }
