@@ -14,12 +14,17 @@
 
 #define R   0
 #define W   1
+#define T   2
+
+#define TRIM    0
+#define UNTRIM  1
 
 class Ftl{
 public:
     Ftl();
     bool processRead(int lpn);
     bool processWrite(int lpn);
+    bool processTrim(int lpn);
     bool updateMap(int lpn, int blockId, int pageId);
     void migratePage(int ppn, Block& block, int pageId);
     bool getUpdateBlock();
@@ -40,7 +45,7 @@ public:
     bool bbHandler(Block &b);
     
 
-    std::unordered_map<int, int> l2p;
+    std::unordered_map<int, std::pair<int, int>> l2p;
     std::vector<Block> blocks;
     std::vector<int> free_blocks;
     Block *updatingBlock;

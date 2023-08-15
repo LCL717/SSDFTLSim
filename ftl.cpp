@@ -6,7 +6,7 @@ Ftl::Ftl() : updatingBlock(nullptr), l2p(), blocks(), free_blocks(){
     int pageNum = PAGES_PER_BLOCK * BLOCKS_PER_DEVICE;
     
     for(int i = 0; i < pageNum; i++) {
-        l2p[i] = INVALID;
+        l2p[i] = std::make_pair(INVALID, UNTRIM);
     }
     
     for(int i = 0; i < BLOCKS_PER_DEVICE; i++) {
@@ -22,11 +22,11 @@ bool Ftl::processRead(int lpn) {
     int pageId;
     ftlMeasurement.update(RR);
 
-    if (l2p[lpn] == INVALID){
+    if (l2p[lpn].first == INVALID){
         return false;
     }
     else {
-        ppn = l2p[lpn];
+        ppn = l2p[lpn].first;
         blockId = Nand::getBlockId(ppn);
         pageId = Nand::getPageId(ppn);
         blocks[blockId].read(pageId);
@@ -74,17 +74,37 @@ bool Ftl::processWrite(int lpn) {
     return true;
 }
 
+bool Ftl::processTrim(int lpn) {
+    int ppn;
+    int blockId;
+    int pageId;
+    if (l2p[lpn].first == INVALID){
+        return false;
+    }
+    else {
+        ppn = l2p[lpn].first;
+        blockId = Nand::getBlockId(ppn);
+        pageId = Nand::getPageId(ppn);
+
+        // mark lpn as trimed
+        l2p[lpn].second = TRIM;
+
+        return true;
+    }
+}
+
 bool Ftl::updateMap(int lpn, int blockId, int pageId) {
     int old_ppn;
 
-    old_ppn = l2p[lpn];
+    old_ppn = l2p[lpn].first;
     if(old_ppn != INVALID) {
          //TODO: handle valid page while writing
     }
-    else {
-        l2p[lpn] = Nand::getPpn(blockId, pageId);
+    //else {
+        l2p[lpn].first = Nand::getPpn(blockId, pageId);
+        l2p[lpn].second = UNTRIM;
         updatingBlock->lpns[pageId] = lpn;
-    }
+    //}
     
     return true;
 }
@@ -98,7 +118,12 @@ bool Ftl::gcHandler(){
     for(auto lpn : victim->lpns) {
         if(lpn == INVALID) continue;
         getUpdateBlock();
-        migratePage(l2p[lpn], *updatingBlock, updatingBlock->offset);
+
+        // TODO: when lpn is not trim, do this migration
+        if(l2p[lpn].second == UNTRIM){
+            migratePage(l2p[lpn].first, *updatingBlock, updatingBlock->offset);
+        }
+        
         updateMap(lpn, updatingBlock->id, updatingBlock->offset);
     }
     victim->erase();
@@ -159,6 +184,9 @@ bool Ftl::processFtl(int request, int lpn){
         break;
     case W:
         processWrite(lpn);
+        break;
+    case T:
+        processTrim(lpn);
         break;
     default:
         break;
