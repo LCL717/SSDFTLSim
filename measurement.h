@@ -9,6 +9,11 @@
 #define READ            0
 #define WRITE           1
 #define ERASE           2
+#define RDH             3
+#define GCH             4
+#define RR              5
+#define RW              6
+#define RE              7
 
 class Measurement{
 private:
@@ -28,6 +33,9 @@ private:
     int pages_overwritten;
 
     int blocks_erased;
+
+    int rdh_times;
+    int gch_times;
 
     static Measurement instance;
     

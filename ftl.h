@@ -24,7 +24,7 @@ public:
     void migratePage(int ppn, Block& block, int pageId);
     bool getUpdateBlock();
 
-    bool processFtl(int request, int lba, int sectorCnt);
+    bool processFtl(int request, int lpn);
 
     /*GC*/
     bool gcHandler();

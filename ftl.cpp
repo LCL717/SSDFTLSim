@@ -1,5 +1,7 @@
 #include "ftl.h"
 
+Measurement& ftlMeasurement = Measurement::getInstance();
+
 Ftl::Ftl() : updatingBlock(nullptr), l2p(), blocks(), free_blocks(){
     int pageNum = PAGES_PER_BLOCK * BLOCKS_PER_DEVICE;
     
@@ -18,6 +20,7 @@ bool Ftl::processRead(int lpn) {
     int ppn;
     int blockId;
     int pageId;
+    ftlMeasurement.update(RR);
 
     if (l2p[lpn] == INVALID){
         return false;
@@ -70,7 +73,7 @@ bool Ftl::processWrite(int lpn) {
         gcHandler();
     }
     bbHandler(*updatingBlock);
-    
+    ftlMeasurement.update(RW);
     return true;
 }
 
@@ -80,11 +83,13 @@ bool Ftl::updateMap(int lpn, int blockId, int pageId) {
     old_ppn = l2p[lpn];
     if(old_ppn != INVALID) {
         //TODO: handle valid page while writing
+        //TODO: Trim is needed to clear useless pages, and avoid write into valid pages.
+        old_ppn = INVALID;
     }
-    else {
-        l2p[lpn] = Nand::getPpn(blockId, pageId);
-        updatingBlock->lpns[pageId] = lpn;
-    }
+    
+    l2p[lpn] = Nand::getPpn(blockId, pageId);
+    updatingBlock->lpns[pageId] = lpn;
+    
     return true;
 }
 
@@ -102,6 +107,7 @@ bool Ftl::gcHandler(){
     }
     victim->erase();
     free_blocks.push_back(victim->id);
+    ftlMeasurement.update(GCH);
     return true;
 }
 
@@ -132,7 +138,6 @@ void Ftl::migratePage(int ppn, Block& block, int pageId) {
 //TODO: Better age algorithm
 bool Ftl::wlHandler() {
     return true;
-
 }
 
 /* Multiple read results in read error(addressed by erase) */
@@ -141,6 +146,7 @@ bool Ftl::rdHandler(Block& target){
         gcHandler();
         std::cout<<"process rd"<<std::endl;
     }
+    ftlMeasurement.update(RDH);
     return true;
 }
 
@@ -149,22 +155,17 @@ bool Ftl::bbHandler(Block &b){
     return true;
 }
 
-bool Ftl::processFtl(int request, int lba, int sectorCnt){
-    int page_start = lba / SECTORS_PER_PAGE;
-    int page_end = (lba + sectorCnt + SECTORS_PER_PAGE - 1) / SECTORS_PER_PAGE;
-    for(int i = page_start; i < page_end; i++) {
-        switch (request)
-        {
-        case R:
-            std::cout<< "read"<< std::endl;
-            processRead(i);
-            break;
-        case W:
-            processWrite(i);
-            break;
-        default:
-            break;
-        }
+bool Ftl::processFtl(int request, int lpn){
+    switch (request)
+    {
+    case R:
+        processRead(lpn);
+        break;
+    case W:
+        processWrite(lpn);
+        break;
+    default:
+        break;
     }
     return true;
 }

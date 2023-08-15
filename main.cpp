@@ -8,13 +8,17 @@ int main(){
 
     /* Initialization */
     Ftl ftl;
-    for(int i = 1; i < PAGES_PER_BLOCK * 3; i++)
+    for(int i = 0; i < PAGES_PER_BLOCK * 3; i++)
     {
-        ftl.processFtl(W, i * SECTORS_PER_PAGE, 2);
+        ftl.processFtl(W, i);
     }
-    for(int i = 1; i < PAGES_PER_BLOCK * 3; i++)
+    for(int i = 0; i < PAGES_PER_BLOCK * 3; i++)
     {
-        ftl.processFtl(R, i * SECTORS_PER_PAGE, 2);
+        ftl.processFtl(W, i);
+    }
+    for(int i = 0; i < PAGES_PER_BLOCK * 2; i++)
+    {
+        ftl.processFtl(R, i);
     }
     
     mainInstance.print_stats();
